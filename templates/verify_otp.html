@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verify OTP</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 25px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .message {
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        
+        .error {
+            background-color: #fdecea;
+            color: #d32f2f;
+        }
+        
+        .success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Two-Factor Authentication</h1>
+        <div id="message" class="error"></div>
+        <div class="form-group">
+            <label>Enter your Google Authenticator code:</label>
+            <input type="text" id="otp_code" placeholder="6-digit code">
+        </div>
+        <button onclick="verifyOTP()">Verify</button>
+        <p>Lost access? <a href="#" id="recovery">Use a recovery code</a></p>
+    </div>
+    <script>
+        let isRecovery = false;
+        document.getElementById('recovery').addEventListener('click', (e) => {
+            e.preventDefault();
+            isRecovery = true;
+            document.querySelector('label').textContent = 'Enter your recovery code:';
+            document.getElementById('otp_code').placeholder = '10-character code';
+        });
+        document.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        verifyOTP();
+    }
+});
+
+        function verifyOTP() {
+    const otp_code = document.getElementById('otp_code').value;
+    const button = document.querySelector('button');
+    
+    button.disabled = true;
+    button.textContent = 'Verifying...';
+    
+    fetch('/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ otp_code })
+    })
+    .then(response => response.json())
+    .then(data => {
+        const messageDiv = document.getElementById('message');
+        messageDiv.textContent = data.message;
+        messageDiv.className = data.status;
+
+        if (data.status === 'success') {
+            window.location.href = '/';
+        } else {
+            button.disabled = false;
+            button.textContent = 'Verify';
+        }
+    })
+    .catch(() => {
+        button.disabled = false;
+        button.textContent = 'Verify';
+    });
+}
+    </script>
+</body>
+</html>

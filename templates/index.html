@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VPS File Manager - /{{ current_path }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f4f6f8;
+            color: #333;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .header .path {
+            font-size: 1.1em;
+        }
+
+        .header .nav-buttons a {
+            margin-left: 10px;
+            padding: 8px 16px;
+            background: #2196F3;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            transition: background 0.2s ease;
+        }
+
+        .header .nav-buttons a:hover {
+            background: #1976D2;
+        }
+
+        .item-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .item {
+            background: #ffffff;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .icon {
+            margin-right: 10px;
+            font-size: 1.3em;
+        }
+
+        .dir { color: #2196F3; }
+        .file { color: #4CAF50; }
+
+        .file-info {
+            font-size: 0.85em;
+            color: #666;
+            margin-left: 12px;
+        }
+
+        .actions {
+            margin-left: auto;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            font-size: 0.85em;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .download-btn { background: #4CAF50; }
+        .download-btn:hover { background: #388E3C; }
+
+        .delete-btn { background: #f44336; }
+        .delete-btn:hover { background: #d32f2f; }
+
+        .parent-link {
+            display: block;
+            margin-bottom: 20px;
+            color: #555;
+            text-decoration: none;
+            font-size: 0.95em;
+        }
+
+        .parent-link:hover {
+            text-decoration: underline;
+        }
+
+        form {
+            display: inline;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="path">
+            <strong>Current path:</strong> /{{ current_path or 'root' }}
+            {% if parent != '' %}
+                <br><a class="parent-link" href="{{ url_for('browse', subpath=parent) }}">↑ Go to parent directory</a>
+            {% endif %}
+        </div>
+        <div class="nav-buttons">
+            <a href="{{ url_for('logs') }}">📜 View Logs</a>
+            <a href="{{ url_for('logout') }}">🚪 Logout</a>
+        </div>
+    </div>
+
+    <ul class="item-list">
+        {% for dir in dirs %}
+        <li class="item dir">
+            <span class="icon">📁</span>
+            <a href="{{ url_for('browse', subpath=current_path + '/' + dir.name if current_path else dir.name) }}">
+                {{ dir.name }}
+            </a>
+            <span class="file-info">{{ dir.size }} | Modified: {{ dir.modified }}</span>
+            <div class="actions">
+                <form action="{{ url_for('delete', target=current_path + '/' + dir.name if current_path else dir.name) }}" method="POST">
+                    <button type="submit" class="btn delete-btn" onclick="return confirm('Delete this directory?')">Delete</button>
+                </form>
+            </div>
+        </li>
+        {% endfor %}
+
+        {% for file in files %}
+        <li class="item file">
+            <span class="icon">📄</span>
+            <span>{{ file.name }}</span>
+            <span class="file-info">{{ file.size }} | Modified: {{ file.modified }}</span>
+            <div class="actions">
+                <a href="{{ url_for('download', filepath=current_path + '/' + file.name if current_path else file.name) }}" class="btn download-btn">Download</a>
+                <form action="{{ url_for('delete', target=current_path + '/' + file.name if current_path else file.name) }}" method="POST">
+                    <button type="submit" class="btn delete-btn" onclick="return confirm('Delete this file?')">Delete</button>
+                </form>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <script>
+        document.querySelectorAll('.file-info').forEach(el => {
+            const text = el.textContent;
+            const match = text.match(/Modified: (\d+)/);
+            if (match) {
+                const timestamp = parseInt(match[1]);
+                const date = new Date(timestamp * 1000);
+                el.textContent = text.replace(/Modified: \d+/, `Modified: ${date.toLocaleString()}`);
+            }
+        });
+    </script>
+</body>
+</html>

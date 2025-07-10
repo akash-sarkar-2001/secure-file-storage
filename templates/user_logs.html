@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Activity Logs</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 16px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 24px;
+        }
+        .log-entry {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .log-header {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .log-details {
+            font-family: monospace;
+            font-size: 14px;
+            background: #f4f4f4;
+            padding: 10px;
+            border-left: 4px solid #3498db;
+            border-radius: 4px;
+        }
+        .button-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .back-btn {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .export-btn {
+            background-color: #2ecc71;
+        }
+    </style>
+</head>
+<body>
+    <div class="button-bar">
+        <a href="/" class="back-btn">&larr; Back to Dashboard</a>
+        <a href="/user-logs/download" class="back-btn export-btn">⬇️ Export CSV</a>
+    </div>
+
+    <h1>Your Activity Logs</h1>
+
+    {% if logs %}
+        {% for log in logs %}
+            <div class="log-entry">
+                <div class="log-header">
+                    <span>Time: {{ log.timestamp }}</span>
+                    <span>Action: <strong>{{ log.data.action|upper }}</strong></span>
+                </div>
+                <div class="log-details">
+                    {% if log.data.filename %}Filename: {{ log.data.filename }}<br>{% endif %}
+                    {% if log.data.permission %}Permission: {{ log.data.permission }}<br>{% endif %}
+                    {% if log.data.ip %}IP: {{ log.data.ip }}<br>{% endif %}
+                    {% if log.data.error %}Error: {{ log.data.error }}<br>{% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No activity logs found for your account.</p>
+    {% endif %}
+</body>
+</html>

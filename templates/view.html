@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viewing {{ filename.split('/')[-1] }}</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; }
+        pre { 
+            background: #f5f5f5; 
+            padding: 15px; 
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .header { 
+            display: flex; 
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .btn {
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            color: white;
+            font-size: 0.9em;
+        }
+        .back-btn { background: #2196F3; }
+        .download-btn { background: #4CAF50; }
+        .file-info { 
+            margin: 10px 0;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .binary-warning {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #ffa000;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <!-- Back button: Goes back to the list of files in the current directory -->
+        <a href="{{ url_for('show_files', directory=os.path.dirname(filename).split('/')[-1]) }}" class="btn back-btn">← Back</a>
+
+        <!-- Download button: Allows file download -->
+        <a href="{{ url_for('download_file', file_path=filename) }}" class="btn download-btn">Download File</a>
+    </div>
+    
+    <h3>{{ filename.split('/')[-1] }}</h3>
+    <div class="file-info">
+        <!-- Display the size and download/delete options -->
+        Size: {{ filesize }} | 
+        <a href="{{ url_for('download_file', file_path=filename) }}">Download</a> | 
+        <a href="{{ url_for('delete_file', file_path=filename) }}" 
+           style="color: #f44336;"
+           onclick="return confirm('Delete this file?')">Delete</a>
+    </div>
+
+    <!-- Display file content if it's viewable, otherwise show binary warning -->
+    {% if viewable %}
+        <pre>{{ content }}</pre>
+    {% else %}
+        <div class="binary-warning">
+            <h4>Binary File Detected</h4>
+            <p>This file type cannot be displayed in the browser. Use the download button to get the file.</p>
+        </div>
+    {% endif %}
+</body>
+</html>
